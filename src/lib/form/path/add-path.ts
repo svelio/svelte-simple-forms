@@ -7,7 +7,7 @@
  */
 
 import type { GenericObject } from '../types';
-import { set as _set } from 'lodash';
+import { set as _set } from 'lodash-es';
 
 export function addPath<T extends GenericObject, Path extends string>(
 	object: T,

@@ -20,7 +20,7 @@
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/kit": "next",
 		"@sveltejs/package": "next",
-		"@types/lodash": "^4.14.186",
+		"@types/lodash-es": "^4.17.6",
 		"@typescript-eslint/eslint-plugin": "^5.27.0",
 		"@typescript-eslint/parser": "^5.27.0",
 		"eslint": "^8.16.0",
@@ -38,7 +38,7 @@
 		"vite": "^3.1.0"
 	},
 	"dependencies": {
-		"lodash": "^4.17.21"
+		"lodash-es": "^4.17.21"
 	},
 	"type": "module"
 }
