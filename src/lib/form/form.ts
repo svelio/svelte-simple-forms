@@ -2,8 +2,8 @@
 // - [ ] create a form component that uses a writeable store, with validation
 
 import { derived, writable } from 'svelte/store';
-import { deepDestructure } from './destructure/deep-destructure';
-import { addPath } from './path/add-path';
+import { deepDestructure } from './destructure/deep-destructure.js';
+import { addPath } from './path/add-path.js';
 import type { CreateFormInput, GenericObject, NestedKeyOf } from './types';
 import { get as _get } from 'lodash';
 
