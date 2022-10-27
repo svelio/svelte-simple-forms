@@ -42,29 +42,34 @@ export type NestedKeyOf<ObjectType extends object> = {
 		: `${Key}`;
 }[keyof ObjectType & (string | number)];
 
+/**
+ * DeepReplace
+ * @description
+ * Replaces the type of a value, recursively
+ * @example
+ * type Replaced = DeepReplace<{ name: string, address: {street: string, city: string} }, boolean>
+ * // { name: boolean, address: {street: boolean, city: boolean} }
+ */
+export type DeepReplace<ObjectType extends GenericObject, NewType> = {
+	[Key in keyof ObjectType]: ObjectType[Key] extends GenericObject
+		? Partial<DeepReplace<ObjectType[Key], NewType>>
+		: NewType;
+};
+
 export type ValidationFunction<Value extends GenericObject, Path extends string> = (
 	value: TypeFromPath<Value, Path>
-) => string | undefined;
+) => string | null | undefined;
 
 export type ValidationObject<T extends GenericObject> = {
 	[K in NestedKeyOf<T>]: ValidationFunction<T, K>;
 };
 
+export type InitialDirty<Values extends GenericObject> = Partial<DeepReplace<Values, boolean>>;
+
+export type InitialTouched<Values extends GenericObject> = Partial<DeepReplace<Values, boolean>>;
+
 export type CreateFormInput<Values extends GenericObject> = {
 	initialValues: Values;
-	validate: Partial<ValidationObject<Values>>;
-};
-
-const testData = {
-	name: 'John',
-	address: {
-		street: '123 Main St',
-		city: 'Anytown',
-		state: 'CA'
-	}
-};
-
-const CreateFormInputs: CreateFormInput<typeof testData> = {
-	initialValues: testData,
-	validate: {}
+	initialDirty?: InitialDirty<Values>;
+	validate?: Partial<ValidationObject<Values>>;
 };
