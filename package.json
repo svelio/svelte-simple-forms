@@ -29,6 +29,7 @@
 		"@types/lodash-es": "^4.17.6",
 		"@typescript-eslint/eslint-plugin": "^5.27.0",
 		"@typescript-eslint/parser": "^5.27.0",
+		"cz-conventional-changelog": "^3.3.0",
 		"eslint": "^8.16.0",
 		"eslint-config-prettier": "^8.3.0",
 		"eslint-plugin-svelte3": "^4.0.0",
@@ -48,5 +49,10 @@
 	"dependencies": {
 		"lodash-es": "^4.17.21"
 	},
-	"type": "module"
+	"type": "module",
+	"config": {
+		"commitizen": {
+			"path": "./node_modules/cz-conventional-changelog"
+		}
+	}
 }
