@@ -1,4 +1,4 @@
-import type { GenericObject } from '../types';
+import type { GenericObject } from '../types.js';
 
 /**
  * @description

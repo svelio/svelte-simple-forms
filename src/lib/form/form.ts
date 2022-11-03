@@ -7,6 +7,37 @@ import { addPath } from './path/add-path.js';
 import type { Errors, CreateFormInput, GenericObject, NestedKeyOf } from './types.js';
 import { get as _get } from 'lodash-es';
 
+/**
+ *
+ * @param initialValues - the initial values of the form
+ * @param validate - a object with functions that validates the form values
+ * @param initialDirty - if any fields should be dirty on initial render
+ * @param initialTouched - if any fields should be touched on initial render
+ * @param initialErrors - if any fields should have errors on initial render
+ * @param classes - the classes to use for different states of the form fields
+ * @returns a writable store with the form values, errors, dirty, touched, and a function to validate the form
+ * @example
+ * const { values, dirty, errors, onSubmit, getInput, getForm = createForm({
+ * 		initialValues: {
+ * 			name: '',
+ * 			email: '',
+ * 		},
+ * 		validate: {
+ * 			name: (value) => {
+ * 				if (!value) {
+ * 					return 'Name is required';
+ * 				}
+ * 			},
+ * 			email: (value) => {
+ * 				if (!value) {
+ * 					return 'Email is required';
+ * 				}
+ * 			},
+ * 		},
+ * 	 });
+ * })
+ *
+ */
 export function createForm<Values extends GenericObject>({
 	initialValues,
 	initialDirty,

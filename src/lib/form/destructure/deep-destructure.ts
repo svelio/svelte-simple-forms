@@ -6,7 +6,7 @@
  * // a = 1, b = 2, c = 3
  */
 
-import type { GenericObject } from '../types';
+import type { GenericObject } from '../types.js';
 
 export function deepDestructure<T extends GenericObject>(object: T | undefined): T {
 	if (!object) {

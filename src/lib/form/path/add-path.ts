@@ -6,7 +6,7 @@
  * // newObject = { a: { b: { c: 1, d: 2 } } }
  */
 
-import type { GenericObject } from '../types';
+import type { GenericObject } from '../types.js';
 import { set as _set } from 'lodash-es';
 
 export function addPath<T extends GenericObject, Path extends string>(
