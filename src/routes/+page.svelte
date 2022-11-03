@@ -9,8 +9,11 @@
 	};
 	import { createForm } from '../lib/form/form.js';
 
-	const { dirty, values, initForm, errors, onSubmit } = createForm<typeof exampleData>({
+	const { dirty, values, errors, onSubmit, getInput, getForm } = createForm<typeof exampleData>({
 		initialValues: exampleData,
+		classes: {
+			error: 'error-input'
+		},
 		validate: {
 			'address.city': (value) => {
 				if (value.length < 3) {
@@ -39,10 +42,6 @@
 				null
 		}
 	});
-
-	const handleSubmit = async (values: any) => console.log(values);
-
-	$: $initForm;
 </script>
 
 <div style="display: flex; flex-direction: column; gap: .25rem">
@@ -56,35 +55,36 @@
 		<p>Dirty: {JSON.stringify($dirty, null, 2)}</p>
 	</div>
 
-	<form on:submit|preventDefault={(e) => onSubmit(e, $values, handleSubmit)}>
+	<form use:getForm={$values}>
 		<div>
 			<label for="name">Name</label>
-			<input type="text" id="name" bind:value={$values.name} class:dirty-input={$dirty.name} />
-			<p>{$errors['name']}</p>
+			<input use:getInput={'name'} type="text" />
 		</div>
 
 		<div>
 			<label for="age">Age</label>
-			<input type="number" id="age" bind:value={$values.age} class:dirty-input={$dirty.age} />
+			<input use:getInput={'age'} type="number" />
 		</div>
 
 		<div>
 			<label for="street">Street</label>
-			<input
-				type="text"
-				id="street"
-				bind:value={$values.address.street}
-				class:dirty-input={$dirty.address?.street}
-			/>
+			<input type="text" use:getInput={'address.street'} />
 		</div>
 		<button type="submit">Submit</button>
 	</form>
+	<div class="error-input" />
 </div>
 
 <style>
 	.dirty-input {
 		color: turquoise;
 		border: turquoise 2px solid;
+		outline: none !important;
+	}
+
+	.error-input {
+		color: red;
+		border: red 2px solid;
 		outline: none !important;
 	}
 </style>

@@ -68,8 +68,18 @@ export type InitialDirty<Values extends GenericObject> = Partial<DeepReplace<Val
 
 export type InitialTouched<Values extends GenericObject> = Partial<DeepReplace<Values, boolean>>;
 
+export type Errors<Values extends GenericObject> = DeepReplace<Values, string | null | undefined>;
+
+export type InitialErrors<Values extends GenericObject> = Partial<Errors<Values>>;
+
 export type CreateFormInput<Values extends GenericObject> = {
 	initialValues: Values;
 	initialDirty?: InitialDirty<Values>;
+	initialErrors?: InitialErrors<Values>;
 	validate?: Partial<ValidationObject<Values>>;
+	classes?: {
+		dirty?: string;
+		error?: string;
+		touched?: string;
+	};
 };

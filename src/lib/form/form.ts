@@ -1,30 +1,75 @@
 // TODO
 // - [ ] create a form component that uses a writeable store, with validation
 
-import { derived, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 import { deepDestructure } from './destructure/deep-destructure.js';
 import { addPath } from './path/add-path.js';
-import type { CreateFormInput, GenericObject, NestedKeyOf } from './types.js';
+import type { Errors, CreateFormInput, GenericObject, NestedKeyOf } from './types.js';
 import { get as _get } from 'lodash-es';
 
 export function createForm<Values extends GenericObject>({
 	initialValues,
 	initialDirty,
-	validate
+	initialErrors,
+	validate,
+	classes
 }: CreateFormInput<Values>) {
 	const values = writable<Values>(deepDestructure(initialValues));
-	const dirty = writable(deepDestructure(initialDirty) || {});
-	const errors = writable<Partial<Record<NestedKeyOf<Values>, string>>>(deepDestructure({}));
+	const touched = writable(deepDestructure(initialDirty) || {});
+	const dirty = writable({
+		...replaceValues(initialValues, false),
+		...deepDestructure(initialDirty)
+	});
+	const errors = writable<Errors<Values>>({
+		...replaceValues(initialValues, null),
+		...deepDestructure(initialErrors)
+	});
 
-	const setDirty = (path: string) => {
+	// function that copies and object, and sets all values to null. Make sure we also get all the nested keys
+	function replaceValues(object: any, newValue: any): any {
+		const emptyObject: any = {};
+		for (const key of Object.keys(object)) {
+			emptyObject[key] =
+				object[key] instanceof Object ? replaceValues(object[key], newValue) : newValue;
+		}
+		return emptyObject;
+	}
+
+	const setDirty = (path: string, node?: HTMLInputElement) => {
 		dirty.update((current) => {
+			if (_get(current, path)) {
+				return current;
+			}
+			if (classes?.dirty && node) {
+				node.classList.add(classes.dirty);
+			}
 			return addPath(current, path, true);
 		});
 	};
 
-	const setError = (path: string, error: string | null | undefined) => {
+	const setError = (path: string, error: string | null | undefined, node?: HTMLInputElement) => {
 		errors.update((current) => {
+			if (_get(current, path) === error) {
+				return current;
+			}
+			if (classes?.error && node && error) {
+				node.classList.add(classes.error);
+			} else if (classes?.error && node && !error) {
+				node.classList.remove(classes.error);
+			}
 			return addPath(current, path, error);
+		});
+	};
+
+	const setTouched = (path: string, node?: HTMLInputElement) => {
+		touched.update((current) => {
+			if (_get(current, path)) {
+				return current;
+			}
+			if (classes?.touched && node) {
+				node.classList.add(classes.touched);
+			}
+			return addPath(current, path, true);
 		});
 	};
 
@@ -52,29 +97,13 @@ export function createForm<Values extends GenericObject>({
 		}, {} as GenericObject);
 	};
 
-	const validateField = (path: NestedKeyOf<Values>, values: Values) => {
+	const validateField = (path: NestedKeyOf<Values>, value: any) => {
 		const validation = validate && validate[path];
 		if (validation) {
-			const value = _get(values, path);
 			const error = validation(value);
 			return error;
 		}
 		return null;
-	};
-
-	const validateAllFields = ($values: Values) => {
-		let hadError = false;
-		deepKeys($values).forEach((key: any) => {
-			if (flattenDeep($values)[key] != flattenDeep(initialValues)[key]) {
-				const result = validateField(key, $values);
-				setDirty(key);
-				setError(key, result);
-				if (!hadError && result) {
-					hadError = true;
-				}
-			}
-		});
-		return hadError;
 	};
 
 	/**
@@ -96,22 +125,64 @@ export function createForm<Values extends GenericObject>({
 	) => {
 		// TODO: add zod-validation
 		e.preventDefault();
-		const hadError = validateAllFields($values);
+		const hadError = false; //validateAllFields($values);
 		if (hadError) {
 			return;
 		}
 		handleSubmit($values);
 	};
 
-	const initForm = derived([values], ([$values]) => {
-		validateAllFields($values);
-	});
+	const handleInput = (e: any, path: NestedKeyOf<Values>) => {
+		const value = (e.target as HTMLInputElement).value;
+		setError(path, validateField(path, value), e.target);
+		setDirty(path, e.target);
+		setTouched(path, e.target);
+		values.update((current) => {
+			return addPath(current, path, (e.target as HTMLInputElement).value);
+		});
+	};
+
+	const getInput = (node: HTMLInputElement, path: NestedKeyOf<Values>) => {
+		node.addEventListener('input', (e) => handleInput(e, path));
+		node.value = _get(initialValues, path);
+		node.id = path;
+		return {
+			update(path: string) {
+				node.id = path;
+			},
+			destroy() {
+				node.removeEventListener('input', (e) => handleInput(e, path));
+			}
+		};
+	};
+
+	const onSubmitHandler = (e: Event, $values: Values) => {
+		onSubmit(e, $values, () => {
+			console.log('submit', $values);
+		});
+	};
+
+	const getForm = (node: HTMLFormElement, $values: Values) => {
+		// create id, by joining all the keys with a dash
+		console.log('getForm', deepKeys(initialValues).join('-'));
+		node.id = deepKeys(initialValues).join('-');
+		node.addEventListener('submit', (e) => onSubmitHandler(e, $values));
+		return {
+			update() {
+				return;
+			},
+			destroy() {
+				return;
+			}
+		};
+	};
 
 	return {
 		values,
 		dirty,
 		errors,
-		initForm,
-		onSubmit
+		onSubmit,
+		getInput,
+		getForm
 	};
 }
