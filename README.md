@@ -91,5 +91,7 @@ yarn add -D @svelio/svelte-simple-forms
 ### Roadmap
 - [x] Basic form functionality
 - [x] Form validation
+- [ ] Support for custom input components (multi select, date picker, etc)
 - [ ] Form validation with yup
 - [ ] Form validation with zod
+- [ ] Form parsing (e.g. parse string to number)
