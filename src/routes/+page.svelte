@@ -7,7 +7,7 @@
 			city: 'New York'
 		}
 	};
-	import { createForm } from '../lib/form';
+	import { createForm } from '../lib/form/form.js';
 
 	const { dirty, values, initForm, errors, onSubmit } = createForm<typeof exampleData>({
 		initialValues: exampleData,

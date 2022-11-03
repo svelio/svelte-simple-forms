@@ -4,7 +4,7 @@
 import { derived, writable } from 'svelte/store';
 import { deepDestructure } from './destructure/deep-destructure.js';
 import { addPath } from './path/add-path.js';
-import type { CreateFormInput, GenericObject, NestedKeyOf } from './types';
+import type { CreateFormInput, GenericObject, NestedKeyOf } from './types.js';
 import { get as _get } from 'lodash-es';
 
 export function createForm<Values extends GenericObject>({
