@@ -1,3 +1,5 @@
+import type { z } from 'zod';
+
 export type Primitive = string | number | symbol;
 
 /**
@@ -77,6 +79,7 @@ export type CreateFormInput<Values extends GenericObject> = {
 	initialDirty?: InitialDirty<Values>;
 	initialErrors?: InitialErrors<Values>;
 	validate?: Partial<ValidationObject<Values>>;
+	zodValidate?: z.ZodType<Values>;
 	classes?: {
 		dirty?: string;
 		error?: string;
