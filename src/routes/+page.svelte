@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { z } from 'zod';
+	import { createForm } from '../lib/form/form.js';
+
 	const exampleData = {
 		name: 'John',
 		age: 30,
@@ -7,40 +10,20 @@
 			city: 'New York'
 		}
 	};
-	import { createForm } from '../lib/form/form.js';
 
 	const { dirty, values, errors, onSubmit, getInput, getForm } = createForm<typeof exampleData>({
 		initialValues: exampleData,
 		classes: {
 			error: 'error-input'
 		},
-		validate: {
-			'address.city': (value) => {
-				if (value.length < 3) {
-					return 'City must be at least 3 characters';
-				}
-				return null;
-			},
-			'address.street': (value) => {
-				if (value.length < 3) {
-					return 'Street must be at least 3 characters';
-				}
-				return null;
-			},
-			name: (value) => {
-				if (!value) {
-					return 'Name is required';
-				}
-				if (value.length < 3) {
-					return 'Name must be at least 3 characters';
-				}
-				return null;
-			},
-			age: (value) =>
-				(value < 2 && 'Come on, how young are you?') ||
-				(value < 18 && 'You must be at least 18 years old') ||
-				null
-		}
+		zodValidate: z.object({
+			name: z.string().min(3, { message: 'Name must be at least 3 characters' }),
+			age: z.number().min(18, { message: 'Must be at least 18 years old' }),
+			address: z.object({
+				street: z.string().min(5, { message: 'Street must be at least 5 characters' }),
+				city: z.string().min(3)
+			})
+		})
 	});
 </script>
 

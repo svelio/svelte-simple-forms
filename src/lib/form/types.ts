@@ -79,7 +79,7 @@ export type CreateFormInput<Values extends GenericObject> = {
 	initialDirty?: InitialDirty<Values>;
 	initialErrors?: InitialErrors<Values>;
 	validate?: Partial<ValidationObject<Values>>;
-	zodValidate?: z.ZodType<Values>;
+	zodValidate?: z.ZodTypeAny;
 	classes?: {
 		dirty?: string;
 		error?: string;

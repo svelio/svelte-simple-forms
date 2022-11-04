@@ -6,6 +6,7 @@ import { deepDestructure } from './destructure/deep-destructure.js';
 import { addPath } from './path/add-path.js';
 import type { Errors, CreateFormInput, GenericObject, NestedKeyOf } from './types.js';
 import { get as _get } from 'lodash-es';
+import zodValidatePath from './zod/zod-validate-path.js';
 
 /**
  *
@@ -43,6 +44,7 @@ export function createForm<Values extends GenericObject>({
 	initialDirty,
 	initialErrors,
 	validate,
+	zodValidate,
 	classes
 }: CreateFormInput<Values>) {
 	const values = writable<Values>(deepDestructure(initialValues));
@@ -130,9 +132,12 @@ export function createForm<Values extends GenericObject>({
 
 	const validateField = (path: NestedKeyOf<Values>, value: any) => {
 		const validation = validate && validate[path];
-		if (validation) {
+		if (validation && !zodValidate) {
 			const error = validation(value);
 			return error;
+		}
+		if (zodValidate) {
+			return zodValidatePath(zodValidate, path, value);
 		}
 		return null;
 	};
@@ -163,26 +168,49 @@ export function createForm<Values extends GenericObject>({
 		handleSubmit($values);
 	};
 
-	const handleInput = (e: any, path: NestedKeyOf<Values>) => {
-		const value = (e.target as HTMLInputElement).value;
+	const handleInput = (
+		e: any,
+		path: NestedKeyOf<Values>,
+		type:
+			| 'undefined'
+			| 'object'
+			| 'boolean'
+			| 'number'
+			| 'string'
+			| 'function'
+			| 'symbol'
+			| 'bigint'
+	) => {
+		let value: number | string;
+		if (type === 'number') {
+			value = parseInt(e.target.value);
+		} else if (type === 'string') {
+			value = e.target.value;
+		} else if (type === 'boolean') {
+			value = e.target.checked;
+		} else {
+			throw new Error('Input type is not supported? - please file an issue on github');
+		}
 		setError(path, validateField(path, value), e.target);
 		setDirty(path, e.target);
 		setTouched(path, e.target);
 		values.update((current) => {
-			return addPath(current, path, (e.target as HTMLInputElement).value);
+			return addPath(current, path, value);
 		});
 	};
 
 	const getInput = (node: HTMLInputElement, path: NestedKeyOf<Values>) => {
-		node.addEventListener('input', (e) => handleInput(e, path));
-		node.value = _get(initialValues, path);
+		const initialValue = _get(initialValues, path);
+		node.value = initialValue;
 		node.id = path;
+		const type = typeof initialValue;
+		node.addEventListener('input', (e) => handleInput(e, path, type));
 		return {
 			update(path: string) {
 				node.id = path;
 			},
 			destroy() {
-				node.removeEventListener('input', (e) => handleInput(e, path));
+				node.removeEventListener('input', (e) => handleInput(e, path, type));
 			}
 		};
 	};
